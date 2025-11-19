@@ -10,23 +10,23 @@ const app = express();
 // Connect to database
 connectDB();
 
-// Allowed origins for CORS
+// Allowed origins
 const allowedOrigins = [
-  "http://localhost:3000",  // Local React development
-  "https://codecollab-frontend.vercel.app"  // Your deployed frontend URL
+  "http://localhost:3000",
+  "https://codecollab-frontend-ten.vercel.app"
 ];
 
 // CORS Configuration
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman)
+    // Allow server-to-server or Postman calls
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
+      return callback(null, true);
     } else {
       console.log("❌ Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
+      return callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true
@@ -75,6 +75,6 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📡 API available at http://localhost:${PORT}`);
+  console.log(`📡 API: http://localhost:${PORT}`);
   console.log(`📊 Projects API: http://localhost:${PORT}/api/projects`);
 });
