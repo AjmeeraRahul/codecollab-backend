@@ -7,21 +7,39 @@ dotenv.config();
 
 const app = express();
 
+// Connect to database
 connectDB();
 
-// CORS configuration - Allow requests from React frontend
+// Allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:3000",  // Local React development
+  "https://codecollab-frontend.vercel.app"  // Your deployed frontend URL
+];
+
+// CORS Configuration
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("❌ Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Import Routes
 const projectRoutes = require('./routes/projectRoutes');
 
-// Test route
+// Root test route
 app.get('/', (req, res) => {
   res.json({ 
     message: '🚀 CodeCollab API Server is running!',
@@ -33,7 +51,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check route
+// Health Check Route
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'healthy',
@@ -44,7 +62,7 @@ app.get('/api/health', (req, res) => {
 // API Routes
 app.use('/api/projects', projectRoutes);
 
-// Handle 404 - Route not found
+// Handle 404 - Not Found
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -52,6 +70,7 @@ app.use((req, res) => {
   });
 });
 
+// Server Port
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
